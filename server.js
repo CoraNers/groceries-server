@@ -41,7 +41,6 @@ app.get('/api/groceries', function (req, res) {
         if (err) {
             res.send(err);
         }
-
         res.json(groceries); // return all groceries in JSON format
     });
 });
@@ -77,11 +76,18 @@ app.put('/api/groceries/:id', function (req, res) {
         quantity: req.body.quantity
     };
     console.log("Updating item - ", req.params.id);
-    Grocery.update({_id: req.params.id}, grocery, function (err, raw) {
+    var ObjectId = require('mongodb').ObjectId;
+    var oid = new ObjectId(req.params.id);
+
+    Grocery.update({"_id": oid}, grocery, function (err, raw) {
         if (err) {
             res.send(err);
         }
-        res.send(raw);
+    });
+    Grocery.find(function (err, groceries) {
+        if (err)
+            res.send(err);
+        res.json(groceries);
     });
 });
 
