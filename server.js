@@ -47,7 +47,6 @@ app.get('/api/groceries', function (req, res) {
 
 // Create a grocery Item
 app.post('/api/groceries', function (req, res) {
-
     console.log("Creating grocery item...");
 
     Grocery.create({
