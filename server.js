@@ -7,7 +7,7 @@ var methodOverride = require('method-override');
 var cors = require('cors');
 
 // Configuration
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/finalProject");
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:27017/groceries");
 
 app.use(bodyParser.urlencoded({'extended': 'true'}));
 app.use(bodyParser.json());
@@ -23,92 +23,89 @@ app.use(function (req, res, next) {
 });
 
 // Model
-var OnTheMenu = mongoose.model('OnTheMenu', {
+var Grocery = mongoose.model('Grocery', {
     name: String,
-    isFavorite: Boolean
+    quantity: Number
 });
 
 
-// Get all items on the menu
-app.get('/api/onTheMenu', function (req, res) {
+// Get all grocery items
+app.get('/api/groceries', function (req, res) {
 
-    console.log("Fetching all items on the current menu");
+    console.log("Listing groceries items...");
 
-    //use mongoose to get all items on the menu in the database
-    OnTheMenu.find(function (err, onTheMenuItems) {
+    //use mongoose to get all groceries in the database
+    Grocery.find(function (err, groceries) {
 
         // if there is an error retrieving, send the error. nothing after res.send(err) will execute
         if (err) {
             res.send(err);
         }
-        res.json(onTheMenuItems); // return all items on the menu in JSON format
+        res.json(groceries); // return all groceries in JSON format
     });
 });
 
-// Add a recipe to the menu
-app.post('/api/onTheMenu', function (req, res) {
-    console.log("Adding recipe to the menu");
+// Create a grocery Item
+app.post('/api/groceries', function (req, res) {
+    console.log("Creating grocery item...");
 
-    OnTheMenu.create({
+    Grocery.create({
         name: req.body.name,
-        isFavorite: false,
+        quantity: req.body.quantity,
         done: false
-    }, function (err, item) {
+    }, function (err, grocery) {
         if (err) {
             res.send(err);
         }
 
-        // create and return all the items on the menu
-        OnTheMenu.find(function (err, onTheMenuItems) {
+        // create and return all the groceries
+        Grocery.find(function (err, groceries) {
             if (err)
                 res.send(err);
-            res.json(onTheMenuItems);
+            res.json(groceries);
         });
     });
 
 });
 
-// Make a menu item a favorite or undoing a favorite
-app.put('/api/onTheMenu/:id', function (req, res) {
-    const menuItem = {
+// Update a grocery Item
+app.put('/api/groceries/:id', function (req, res) {
+    const grocery = {
         name: req.body.name,
-        isFavorite: req.body.isFavorite
+        quantity: req.body.quantity
     };
-    console.log("Updating menu item id - ", req.params.id);
-    console.log("Updating menu item name - ", req.params.name);
-    console.log("Updating menu item isFavorite- ", req.params.isFavorite);
-
+    console.log("Updating item - ", req.params.id);
     var ObjectId = require('mongodb').ObjectId;
     var oid = new ObjectId(req.params.id);
 
-    OnTheMenu.update({"_id": oid}, menuItem, function (err, raw) {
+    Grocery.update({"_id": oid}, grocery, function (err, raw) {
         if (err) {
             res.send(err);
         }
     });
-    OnTheMenu.find(function (err, onTheMenuItems) {
+    Grocery.find(function (err, groceries) {
         if (err)
             res.send(err);
-        res.json(onTheMenuItems);
+        res.json(groceries);
     });
 });
 
 
-// Delete a menu Item
-app.delete('/api/onTheMenu/:id', function (req, res) {
-    OnTheMenu.remove({
+// Delete a grocery Item
+app.delete('/api/groceries/:id', function (req, res) {
+    Grocery.remove({
         _id: req.params.id
-    }, function (err, menuItem) {
+    }, function (err, grocery) {
         if (err) {
-            console.error("Error deleting menuItem ", err);
+            console.error("Error deleting grocery ", err);
         }
         else {
-            OnTheMenu.find(function (err, onTheMenuItems) {
+            Grocery.find(function (err, groceries) {
                 if (err) {
                     res.send(err);
                 }
                 else {
-                    res.json(onTheMenuItems);
+                    res.json(groceries);
                 }
             });
         }
@@ -118,4 +115,4 @@ app.delete('/api/onTheMenu/:id', function (req, res) {
 
 // Start app and listen on port 8080  
 app.listen(process.env.PORT || 8080);
-console.log("Final Project server listening on port  - ", (process.env.PORT || 8080));
+console.log("Grocery server listening on port  - ", (process.env.PORT || 8080));
